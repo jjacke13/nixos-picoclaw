@@ -6,31 +6,37 @@
 
 buildGoModule rec {
   pname = "picoclaw";
-  version = "0.1.2";
+  version = "0.2.0";
 
   src = fetchFromGitHub {
     owner = "sipeed";
     repo = "picoclaw";
     rev = "v${version}";
-    hash = "sha256-2q/BQmZaSh88kwquiQlWGS36MVFWWdUzsMxGp4cAMiE=";
+    hash = "sha256-zCeURNN152yL3Qi1UFDvSB85xflbLAMzQUTwGThALss=";
   };
 
-  vendorHash = "sha256-3kDU3pbcz+2cd36/bcbdU/IXTAeJosBZ+syUQqO2bls=";
+  vendorHash = "sha256-EJAYrVMDgAXssqRcCdjrYbuKsKSp7tIG5xvLeY0xZeY=";
 
   # Relax Go version requirement (upstream requires 1.25.7, nixpkgs has 1.25.6)
-  # Copy workspace for go:embed directive
+  # Copy workspace for go:embed directive (moved to onboard subpackage in v0.2.0)
   postPatch = ''
     substituteInPlace go.mod --replace-fail "go 1.25.7" "go 1.25.6"
-    cp -r workspace cmd/picoclaw/
+    cp -r workspace cmd/picoclaw/internal/onboard/
   '';
 
   subPackages = [ "cmd/picoclaw" ];
 
-  ldflags = [
-    "-s"
-    "-w"
-    "-X main.Version=${version}"
-  ];
+  ldflags =
+    let
+      internal = "github.com/sipeed/picoclaw/cmd/picoclaw/internal/version";
+    in
+    [
+      "-s"
+      "-w"
+      "-X ${internal}.version=${version}"
+      "-X ${internal}.gitCommit=nixbuild"
+      "-X ${internal}.buildTime=1970-01-01T00:00:00Z"
+    ];
 
   meta = with lib; {
     description = "Ultra-lightweight AI assistant agent";
