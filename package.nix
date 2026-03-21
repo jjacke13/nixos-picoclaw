@@ -6,23 +6,26 @@
 
 buildGoModule rec {
   pname = "picoclaw";
-  version = "0.2.2";
+  version = "0.2.3";
 
   src = fetchFromGitHub {
     owner = "sipeed";
     repo = "picoclaw";
     rev = "v${version}";
-    hash = "sha256-GUtEoni8zk17jh6eWVl2dNBlvmOW1vZpk/7eLjlavTU=";
+    hash = "sha256-CnwfnYl7hciCbgC0P/I9anGdmrzpRalutGmPAJ6H7NI=";
   };
 
-  vendorHash = "sha256-lAyXXUAgYY/6uyLm2cLkm4RKdMZ+yD4DKJ3Rmyyzp9s=";
+  vendorHash = "sha256-3MjBLklUpMTcz5/tW7Lr6d4wJ1x7ylFiEZkyeJI0CUA=";
 
-  # Relax Go version requirement (upstream requires 1.25.7, nixpkgs has 1.25.6)
   # Copy workspace for go:embed directive (moved to onboard subpackage in v0.2.0)
   postPatch = ''
-    substituteInPlace go.mod --replace-fail "go 1.25.7" "go 1.25.6"
     cp -r workspace cmd/picoclaw/internal/onboard/
   '';
+
+  # Allow go to update go.mod after version patch
+  overrideModAttrs = _: {
+    env.GOFLAGS = "-mod=mod";
+  };
 
   subPackages = [ "cmd/picoclaw" ];
 
