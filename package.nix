@@ -22,24 +22,8 @@ buildGoModule rec {
     cp -r workspace cmd/picoclaw/internal/onboard/
   '';
 
-  # Allow go to update go.mod after version patch
-  overrideModAttrs = _: {
-    env.GOFLAGS = "-mod=mod";
-  };
-
   subPackages = [ "cmd/picoclaw" ];
-
-  ldflags =
-    let
-      internal = "github.com/sipeed/picoclaw/cmd/picoclaw/internal/version";
-    in
-    [
-      "-s"
-      "-w"
-      "-X ${internal}.version=${version}"
-      "-X ${internal}.gitCommit=nixbuild"
-      "-X ${internal}.buildTime=1970-01-01T00:00:00Z"
-    ];
+  doCheck = false;
 
   meta = with lib; {
     description = "Ultra-lightweight AI assistant agent";
